@@ -7,7 +7,6 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
       body: SafeArea(
@@ -73,7 +72,7 @@ class LoginPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 22),
-                        
+
                         Container(
                           decoration: BoxDecoration(
                             color: const Color(0xFFF7F8FB),
@@ -96,7 +95,9 @@ class LoginPage extends StatelessWidget {
                         SizedBox(
                           height: 54,
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/otp');
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               foregroundColor: Colors.black,
