@@ -62,7 +62,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                     border: Border.all(color: const Color(0xFFD6D7DC)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 18,
                         offset: const Offset(0, 8),
                       ),
@@ -115,7 +115,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                             child: Container(
                               height: 54,
                               margin: EdgeInsets.only(
-                                right: index == 5 ? 0 : 5 ,
+                                right: index == 5 ? 0 : 5,
                               ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF7F8FB),
