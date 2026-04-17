@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   const VerifyOtpPage({super.key});
@@ -383,128 +387,171 @@ class HomeFeedPage extends StatelessWidget {
   }
 }
 
-class ReelsPage extends StatelessWidget {
+class ReelsPage extends StatefulWidget {
   const ReelsPage({super.key});
+
+  @override
+  State<ReelsPage> createState() => _ReelsPageState();
+}
+
+class _ReelsPageState extends State<ReelsPage> {
+  final PageController _pageController = PageController();
+
+  List<String> reelsVideos = [
+    'assets/videos/s1.mp4',
+    'assets/videos/s2.mp4',
+    'assets/videos/s3.mp4',
+    'assets/videos/s4.mp4',
+  ];
+  Future<void> pickVideo() async {
+    final picker = ImagePicker();
+
+    final XFile? video = await ImagePicker().pickVideo(
+      source: ImageSource.gallery,
+      maxDuration: const Duration(seconds: 60),
+    );
+    if (video != null) {
+      setState(() {
+        reelsVideos.insert(0, video.path); // 🔥 Add on top
+      });
+
+      // Optional: jump to first reel
+      _pageController.jumpToPage(0);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(centerTitle: true, title: const Text('Reels Page')),
       backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.network(
-                'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1000&q=80',
-                fit: BoxFit.cover,
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.24),
-                    Colors.black.withOpacity(0.04),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Icon(Icons.add, color: Colors.white, size: 28),
-                      Text(
-                        'Brokkrs',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Icon(Icons.tune, color: Colors.white, size: 26),
-                    ],
-                  ),
-                  const Spacer(),
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 18),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.42),
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const CircleAvatar(
-                              radius: 18,
-                              backgroundImage: NetworkImage(
-                                'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=80&q=80',
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Text(
-                                'Ammar Estate & Builders • Follow',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Escape to your dream villa in Lonavala',
-                          style: TextStyle(color: Colors.white, fontSize: 15),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Surrounded by lush greenery, fresh air, and peaceful vibes — perfect for weekend getaways or a luxury lifestyle.',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      const _OverlayAction(
-                        icon: Icons.favorite_border,
-                        label: 'Like',
-                      ),
-                      const _OverlayAction(
-                        icon: Icons.chat_bubble_outline,
-                        label: 'Comment',
-                      ),
-                      const _OverlayAction(icon: Icons.send, label: 'WhatsApp'),
-                      const _OverlayAction(
-                        icon: Icons.bookmark_border,
-                        label: 'Save',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      body: PageView.builder(
+        controller: _pageController,
+        scrollDirection: Axis.vertical,
+        itemCount: reelsVideos.length,
+        itemBuilder: (context, index) {
+          return ReelItem(videoUrl: reelsVideos[index]);
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: pickVideo,
+        backgroundColor: Colors.white,
+        child: const Icon(Icons.videocam, color: Colors.black),
       ),
     );
   }
 }
+
+class ReelItem extends StatefulWidget {
+  final String videoUrl;
+
+  const ReelItem({super.key, required this.videoUrl});
+
+  @override
+  State<ReelItem> createState() => _ReelItemState();
+}
+
+class _ReelItemState extends State<ReelItem> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _initVideo();
+  }
+
+  Future<void> _initVideo() async {
+    try {
+      if (widget.videoUrl.startsWith('assets/')) {
+        _controller = VideoPlayerController.asset(widget.videoUrl);
+      } else {
+        _controller = VideoPlayerController.file(File(widget.videoUrl));
+      }
+
+      await _controller.initialize();
+      _controller.setLooping(true);
+      await _controller.play();
+
+      if (mounted) setState(() {});
+    } catch (e) {
+      print("VIDEO ERROR: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (_controller.value.isPlaying) {
+          _controller.pause();
+        } else {
+          _controller.play();
+        }
+        setState(() {});
+      },
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          /// 🎬 VIDEO
+          Positioned.fill(
+            child: _controller.value.isInitialized
+                ? FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: _controller.value.size.width,
+                      height: _controller.value.size.height,
+                      child: VideoPlayer(_controller),
+                    ),
+                  )
+                : const Center(child: CircularProgressIndicator()),
+          ),
+
+          /// ▶️ PLAY ICON ANIMATION
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: _controller.value.isPlaying ? 0 : 1,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
+              ),
+              padding: const EdgeInsets.all(20),
+              child: const Icon(
+                Icons.play_arrow,
+                size: 60,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// class _OverlayAction extends StatelessWidget {
+//   final IconData icon;
+//   final String label;
+
+//   const _OverlayAction({required this.icon, required this.label});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       children: [
+//         Icon(icon, color: Colors.white),
+//         const SizedBox(height: 4),
+//         Text(label, style: const TextStyle(color: Colors.white)),
+//       ],
+//     );
+//   }
+// }
 
 class ChatListPage extends StatelessWidget {
   const ChatListPage({super.key});
@@ -629,7 +676,7 @@ class ChatDetailPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 16,
                             offset: const Offset(0, 8),
                           ),
@@ -1041,7 +1088,7 @@ class _ChatBubble extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -1074,7 +1121,7 @@ class _SocialButton extends StatelessWidget {
         border: Border.all(color: const Color(0xFFD6D7DC)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -1109,23 +1156,19 @@ class _ActionChip extends StatelessWidget {
   }
 }
 
-class _OverlayAction extends StatelessWidget {
+class ReelActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _OverlayAction({required this.icon, required this.label});
+  const ReelActionButton({super.key, required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: Colors.white.withOpacity(0.12),
-          child: Icon(icon, color: Colors.white, size: 22),
-        ),
-        const SizedBox(height: 6),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+        Icon(icon, color: Colors.white),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(color: Colors.white)),
       ],
     );
   }
@@ -1326,7 +1369,7 @@ class _NotificationTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),

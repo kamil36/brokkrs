@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "934493147073",
+    "project_id": "brokkers-3cf67",
+    "storage_bucket": "brokkers-3cf67.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:934493147073:android:0efede8c792fd324172940",
+        "android_client_info": {
+          "package_name": "com.example.brokkrs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7JbzXnkgoJHD509lLjU7D96eqUjyK07g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
